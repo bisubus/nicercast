@@ -130,7 +130,11 @@ Nicercast.prototype.setInputStream = function (inputStream) {
 }
 
 Nicercast.prototype.listen = function (port, hostname, backlog, callback) {
-  this._server.listen.apply(this._server, arguments)
+  this._server.listen(port, hostname, backlog, () => {
+    // If a port of 0 is provided, the server will pick an appropriate port.
+    // ensure we invoke our callback with whatever port is running
+    callback(this._server.address().port)
+  })
 }
 
 Nicercast.prototype.close = function (callback) {
@@ -142,7 +146,7 @@ Nicercast.prototype.address = function () {
 }
 
 function start (port, callback) {
-  this.listen(port, callback)
+  this.listen(port, undefined, undefined, callback)
 }
 
 function stop () {
