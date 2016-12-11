@@ -1,17 +1,19 @@
-var icy = require('icy')
-var url = require('url')
-var http = require('http')
-var lame = require('lame')
-var util = require('util')
+const icy = require('icy')
+const url = require('url')
+const http = require('http')
+const lame = require('lame')
+const util = require('util')
 
-var CHANNELS = 2
-var SAMPLE_SIZE = 16
-var SAMPLE_RATE = 44100
-var META_INTERVAL = 8192
+const CHANNELS = 2
+const SAMPLE_SIZE = 16
+const SAMPLE_RATE = 44100
+const META_INTERVAL = 8192
 
 function removeValueFromArray (array, value) {
-  var index = array.indexOf(value)
-  if (index >= 0) array.splice(index, 1)
+  const index = array.indexOf(value)
+  if (index >= 0) {
+    array.splice(index, 1)
+  }
 }
 
 function Nicercast (inputStream, opts) {
@@ -53,7 +55,7 @@ Nicercast.prototype._handleRequest = function (req, res) {
 }
 
 Nicercast.prototype._playlist = function (req, res) {
-  var urlProps = {
+  const urlProps = {
     protocol: 'http',
     pathname: '/listen'
   }
@@ -61,7 +63,7 @@ Nicercast.prototype._playlist = function (req, res) {
   if (req.headers.host) {
     urlProps.host = req.headers.host
   } else {
-    var info = req.socket.address()
+    const info = req.socket.address()
     urlProps.hostname = info.address
     urlProps.port = info.port
   }
@@ -71,7 +73,7 @@ Nicercast.prototype._playlist = function (req, res) {
 }
 
 Nicercast.prototype._listen = function (req, res) {
-  var acceptsMetadata = (req.headers['icy-metadata'] === '1')
+  const acceptsMetadata = (req.headers['icy-metadata'] === '1')
 
   res.writeHead(200, {
     'Connection': 'close',
@@ -79,7 +81,7 @@ Nicercast.prototype._listen = function (req, res) {
     'Icy-Metaint': (acceptsMetadata ? META_INTERVAL : undefined)
   })
 
-  var output
+  let output
   if (acceptsMetadata) {
     output = new icy.Writer(META_INTERVAL)
     this._metadataStreams.push(output)
@@ -89,7 +91,7 @@ Nicercast.prototype._listen = function (req, res) {
     output = res
   }
 
-  var encoder = new lame.Encoder({
+  const encoder = new lame.Encoder({
     channels: CHANNELS,
     bitDepth: SAMPLE_SIZE,
     sampleRate: SAMPLE_RATE
@@ -119,7 +121,7 @@ Nicercast.prototype.setMetadata = function (metadata) {
 }
 
 Nicercast.prototype.setInputStream = function (inputStream) {
-  var currentInput = this._inputStream
+  const currentInput = this._inputStream
 
   this._listenStreams.forEach(function (stream) {
     currentInput.unpipe(stream)
