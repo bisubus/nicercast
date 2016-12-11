@@ -136,11 +136,7 @@ class Nicercast {
     }
 
     listen(port, callback) {
-        this._server.listen(port, () => {
-            // If a port of 0 is provided, the server will pick an appropriate port.
-            // ensure we invoke our callback with whatever port is running
-            callback(this._server.address().port)
-        })
+        return this._server.listen(port, callback)
     }
 
     close(callback) {
