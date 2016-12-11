@@ -15,15 +15,16 @@
   ],
   "author": "Stephen Wan <stephen@stephenwan.net>",
   "contributors": [
-    "Linus Unnebäck <linus@folkdatorn.se>"
+    "Linus Unnebäck <linus@folkdatorn.se>",
+    "James Booth <jabooth@gmail.com>"
   ],
   "dependencies": {
     "icy": "^2.1.0",
-    "lame": "^1.2.3"
+    "lame": "^1.2.4"
   },
   "devDependencies": {
     "baudio": "^2.1.2",
-    "concat-stream": "^1.5.1",
+    "concat-stream": "^1.5.2",
     "mocha": "^2.4.5",
     "standard": "^7.0.1"
   }
