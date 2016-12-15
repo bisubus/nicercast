@@ -4,7 +4,9 @@
   "license": "MIT",
   "repository": "stephen/nicercast",
   "scripts": {
-    "test": "standard && mocha"
+    "build": "tsc",
+    "watch": "tsc -w",
+    "test": "mocha"
   },
   "keywords": [
     "streaming",
@@ -19,13 +21,13 @@
     "James Booth <jabooth@gmail.com>"
   ],
   "dependencies": {
+    "@types/node": "^6.0.52",
     "icy": "^2.1.0",
     "lame": "^1.2.4"
   },
   "devDependencies": {
     "baudio": "^2.1.2",
     "concat-stream": "^1.5.2",
-    "mocha": "^2.4.5",
-    "standard": "^7.0.1"
+    "mocha": "^2.4.5"
   }
 }

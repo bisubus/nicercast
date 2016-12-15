@@ -1,37 +1,38 @@
-'use strict'
-
-const icy = require('icy')
-const url = require('url')
-const http = require('http')
-const lame = require('lame')
+import { Server, createServer, IncomingMessage, ServerResponse} from 'http'
+import { EventEmitter } from 'events'
+import * as icy from 'icy'
+import * as lame from 'lame'
+import * as url from 'url'
 
 const CHANNELS = 2
 const SAMPLE_SIZE = 16
 const SAMPLE_RATE = 44100
 const META_INTERVAL = 8192
 
-function removeValueFromArray(array, value) {
+function removeValueFromArray<T>(array: T[], value: T) {
     const index = array.indexOf(value)
     if (index >= 0) {
         array.splice(index, 1)
     }
 }
 
-class Nicercast {
+export class Nicercast {
 
-    constructor(inputStream, opts) {
+    _server: Server
+    _inputStream: EventEmitter
+    _metadata: string
+    _listenStreams = []
+    _metadataStreams = []
 
-        opts = opts || {}
+    constructor(inputStream: EventEmitter, metadata = 'Nicercast') {
 
-        this._server = http.createServer(this._handleRequest.bind(this))
+        this._server = createServer(this._handleRequest.bind(this))
         this._inputStream = inputStream
-        this._metadata = opts.metadata || 'Nicercast'
+        this._metadata = metadata
 
-        this._listenStreams = []
-        this._metadataStreams = []
     }
 
-    _handleRequest(req, res) {
+    _handleRequest(req: IncomingMessage, res: ServerResponse) {
         switch (req.url) {
             case '/':
             case '/listen.m3u':
@@ -58,7 +59,7 @@ class Nicercast {
         }
     }
 
-    _playlist(req, res) {
+    _playlist(req: IncomingMessage, res: ServerResponse) {
         const urlProps = {
             protocol: 'http',
             pathname: '/listen'
@@ -76,7 +77,7 @@ class Nicercast {
         res.end(url.format(urlProps))
     }
 
-    _listen(req, res) {
+    _listen(req: IncomingMessage, res: ServerResponse) {
         const acceptsMetadata = (req.headers['icy-metadata'] === '1')
 
         res.writeHead(200, {
@@ -116,18 +117,18 @@ class Nicercast {
         req.socket.on('close', teardown.bind(this))
     }
 
-    setMetadata(metadata) {
+    setMetadata(metadata: string) {
         this._metadata = metadata
 
-        this._metadataStreams.forEach(function (stream) {
+        this._metadataStreams.forEach((stream) => {
             stream.queue(metadata)
         })
     }
 
-    setInputStream(inputStream) {
+    setInputStream(inputStream: EventEmitter) {
         const currentInput = this._inputStream
 
-        this._listenStreams.forEach(function (stream) {
+        this._listenStreams.forEach((stream) => {
             currentInput.unpipe(stream)
             inputStream.pipe(stream)
         })
@@ -135,17 +136,15 @@ class Nicercast {
         this._inputStream = inputStream
     }
 
-    listen(port, callback) {
+    listen(port: number, callback: Function) {
         return this._server.listen(port, callback)
     }
 
-    close(callback) {
-        this._server.close.apply(this._server, arguments)
+    close(callback: Function) {
+        this._server.close(callback)
     }
 
     address() {
         return this._server.address()
     }
 }
-
-module.exports = Nicercast
