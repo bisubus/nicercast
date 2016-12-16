@@ -62,7 +62,7 @@ export class Nicercast {
     _playlist(req: IncomingMessage, res: ServerResponse) {
         const urlProps = {
             protocol: 'http',
-            pathname: '/listen'
+            pathname: '/listen',
         }
 
         if (req.headers.host) {
@@ -81,9 +81,9 @@ export class Nicercast {
         const acceptsMetadata = (req.headers['icy-metadata'] === '1')
 
         res.writeHead(200, {
-            'Connection': 'close',
+            Connection: 'close',
             'Content-Type': 'audio/mpeg',
-            'Icy-Metaint': (acceptsMetadata ? META_INTERVAL : undefined)
+            'Icy-Metaint': (acceptsMetadata ? META_INTERVAL : undefined),
         })
 
         let output
@@ -99,7 +99,7 @@ export class Nicercast {
         const encoder = new lame.Encoder({
             channels: CHANNELS,
             bitDepth: SAMPLE_SIZE,
-            sampleRate: SAMPLE_RATE
+            sampleRate: SAMPLE_RATE,
         })
 
         this._listenStreams.push(encoder)

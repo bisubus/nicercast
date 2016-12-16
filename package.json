@@ -6,6 +6,7 @@
   "scripts": {
     "build": "tsc",
     "watch": "tsc -w",
+    "lint": "tslint -c tslint.json ./*.ts",
     "test": "mocha"
   },
   "keywords": [
@@ -28,6 +29,8 @@
   "devDependencies": {
     "baudio": "^2.1.2",
     "concat-stream": "^1.5.2",
-    "mocha": "^2.4.5"
+    "mocha": "^2.4.5",
+    "tslint": "^4.1.0",
+    "typescript": "^2.1.4"
   }
 }

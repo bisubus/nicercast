@@ -1,6 +1,6 @@
 import { Nicercast } from '.'
 
-// Stream raw audio from stdin
+// stream raw audio from stdin
 const input = process.stdin
 const server = new Nicercast(input)
 
