@@ -3,10 +3,12 @@
   "version": "0.2.0",
   "license": "MIT",
   "repository": "stephen/nicercast",
+  "main": "./lib/index.js",
+  "types": "./lib/index.d.ts",
   "scripts": {
     "build": "tsc",
     "watch": "tsc -w",
-    "lint": "tslint -c tslint.json ./*.ts",
+    "lint": "tslint -c tslint.json ./src/*.ts",
     "test": "mocha"
   },
   "keywords": [
