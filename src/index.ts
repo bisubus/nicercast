@@ -1,4 +1,5 @@
 import { Server, createServer, IncomingMessage, ServerResponse} from 'http'
+import * as net from 'net'
 import { EventEmitter } from 'events'
 import * as icy from 'icy'
 import * as lame from 'lame'
@@ -60,19 +61,18 @@ export class Nicercast {
     }
 
     _playlist(req: IncomingMessage, res: ServerResponse) {
-        const urlProps = {
+        const urlProps: { [key: string]: string | number } = {
             protocol: 'http',
             pathname: '/listen',
         }
 
         if (req.headers.host) {
-            urlProps.host = req.headers.host
+            urlProps['host'] = req.headers.host
         } else {
             const info = req.socket.address()
-            urlProps.hostname = info.address
-            urlProps.port = info.port
+            urlProps['hostname'] = info.address
+            urlProps['port'] = info.port
         }
-
         res.writeHead(200, { 'Content-Type': 'audio/x-mpegurl' })
         res.end(url.format(urlProps))
     }
@@ -104,17 +104,15 @@ export class Nicercast {
 
         this._listenStreams.push(encoder)
 
-        function teardown() {
+        this._inputStream.pipe(encoder).pipe(output)
+        req.socket.on('close', () => {
             removeValueFromArray(this._listenStreams, encoder)
             removeValueFromArray(this._metadataStreams, output)
 
             this._inputStream.unpipe(encoder)
             encoder.unpipe(output)
             encoder.end()
-        }
-
-        this._inputStream.pipe(encoder).pipe(output)
-        req.socket.on('close', teardown.bind(this))
+        })
     }
 
     setMetadata(metadata: string) {
@@ -136,7 +134,7 @@ export class Nicercast {
         this._inputStream = inputStream
     }
 
-    listen(port: number, callback: Function) {
+    listen(port: number, callback: Function): net.Server {
         return this._server.listen(port, callback)
     }
 
