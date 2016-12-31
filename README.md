@@ -2,6 +2,12 @@
 
 Simple Node.js icecast compliant streaming server.
 
+# IMPORTANT NOTE - TYPESCRIPT FORK
+
+This is a fork of [stephen/nicercast](https://github.com/stephen/nicercast) that @jabooth undertook for fun in Dec 2016. I moved `nicercast` and a handful of other projects to Typescript and placed them under a new namespace at [github/homeaudio](https://github.com/homeaudio/) in an effort to better understand and rapidly improve all these interrelated projects.
+
+For now I'm maintaining my forks at [github/homeaudio](https://github.com/homeaudio/), but I would be delighted if these forks were re-unified with their original projects at some point. Given the extensive nature of the changes made though, I understand that this may be challenging for the original authors.
+
 ## Installation
 
 ```sh
@@ -11,13 +17,13 @@ npm install --save nicercast
 ## Usage
 
 ```js
-const Nicercast = require('nicercast')
+import { Nicercast } from 'nicercast'
 
 // Stream raw audio from stdin
 const input = process.stdin
 const server = new Nicercast(input, { metadata: 'Process Input' })
 
-server.listen(3000, function () {
+server.listen(3000, () => {
   console.log('http://localhost:3000/listen.m3u')
 })
 ```

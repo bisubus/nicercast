@@ -1,13 +1,14 @@
 {
-  "name": "nicercast",
+  "name": "@homeaudio/nicercast",
   "version": "0.2.0",
   "license": "MIT",
-  "repository": "stephen/nicercast",
+  "repository": "homeaudio/nicercast",
   "scripts": {
     "build": "tsc",
     "watch": "tsc -w",
     "lint": "tslint -c tslint.json *.ts",
-    "test": "mocha"
+    "test": "mocha",
+    "prepublish": "tsc && echo Compiled successfully || echo Compiled with errors"
   },
   "keywords": [
     "streaming",
@@ -22,7 +23,7 @@
     "James Booth <jabooth@gmail.com>"
   ],
   "dependencies": {
-    "@types/node": "^6.0.54",
+    "@types/node": "^6.0.55",
     "icy": "^2.1.0",
     "lame": "^1.2.4"
   },
