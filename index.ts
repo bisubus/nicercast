@@ -126,9 +126,9 @@ export class Nicercast {
     setInputStream(inputStream: NodeJS.ReadStream) {
         const currentInput = this._inputStream;
 
-        this._listenStreams.forEach((listenStream) => {
-            currentInput.unpipe(listenStream);
-            inputStream.pipe(listenStream);
+        this._listenStreams.forEach((stream) => {
+            currentInput.unpipe(stream);
+            inputStream.pipe(stream);
         });
 
         this._inputStream = inputStream;
