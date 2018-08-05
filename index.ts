@@ -1,9 +1,9 @@
-import { Server, createServer, IncomingMessage, ServerResponse } from 'http';
+import * as http from 'http';
 import * as net from 'net';
-import { EventEmitter } from 'events';
 import * as icy from 'icy';
 import * as lame from 'lame';
 import * as url from 'url';
+import * as stream from 'stream';
 
 const CHANNELS = 2;
 const SAMPLE_SIZE = 16;
@@ -19,21 +19,21 @@ function removeValueFromArray<T>(array: T[], value: T) {
 
 export class Nicercast {
 
-    _server: Server;
-    _inputStream: EventEmitter;
+    _server: http.Server;
+    _inputStream: NodeJS.ReadStream;
     _metadata: string;
-    _listenStreams = [];
-    _metadataStreams = [];
+    _listenStreams: stream.Transform[] = [];
+    _metadataStreams: icy.Writer[] = [];
 
-    constructor(inputStream: EventEmitter, metadata = 'Nicercast') {
+    constructor(inputStream: NodeJS.ReadStream, metadata = 'Nicercast') {
 
-        this._server = createServer(this._handleRequest.bind(this));
+        this._server = http.createServer(this._handleRequest.bind(this));
         this._inputStream = inputStream;
         this._metadata = metadata;
 
     }
 
-    _handleRequest(req: IncomingMessage, res: ServerResponse) {
+    _handleRequest(req: http.IncomingMessage, res: http.ServerResponse) {
         switch (req.url) {
             case '/':
             case '/listen.m3u':
@@ -60,8 +60,8 @@ export class Nicercast {
         }
     }
 
-    _playlist(req: IncomingMessage, res: ServerResponse) {
-        const urlProps: { [key: string]: string | number } = {
+    _playlist(req: http.IncomingMessage, res: http.ServerResponse) {
+        const urlProps: url.UrlObject = {
             protocol: 'http',
             pathname: '/listen',
         };
@@ -69,7 +69,7 @@ export class Nicercast {
         if (req.headers.host) {
             urlProps['host'] = req.headers.host;
         } else {
-            const info = req.socket.address();
+            const info = req.socket.address() as { port: number; family: string; address: string };
             urlProps['hostname'] = info.address;
             urlProps['port'] = info.port;
         }
@@ -77,7 +77,7 @@ export class Nicercast {
         res.end(url.format(urlProps));
     }
 
-    _listen(req: IncomingMessage, res: ServerResponse) {
+    _listen(req: http.IncomingMessage, res: http.ServerResponse) {
         const acceptsMetadata = (req.headers['icy-metadata'] === '1');
 
         res.writeHead(200, {
@@ -86,17 +86,17 @@ export class Nicercast {
             'Icy-Metaint': (acceptsMetadata ? META_INTERVAL : undefined),
         });
 
-        let output;
+        let output: stream.Writable;
         if (acceptsMetadata) {
             output = new icy.Writer(META_INTERVAL);
-            this._metadataStreams.push(output);
-            output.queueMetadata(this._metadata);
+            this._metadataStreams.push(output as icy.Writer);
+            (output as icy.Writer).queue(this._metadata);
             output.pipe(res);
         } else {
             output = res;
         }
 
-        const encoder = new lame.Encoder({
+        const encoder: stream.Transform = new lame.Encoder({
             channels: CHANNELS,
             bitDepth: SAMPLE_SIZE,
             sampleRate: SAMPLE_RATE,
@@ -107,7 +107,7 @@ export class Nicercast {
         this._inputStream.pipe(encoder).pipe(output);
         req.socket.on('close', () => {
             removeValueFromArray(this._listenStreams, encoder);
-            removeValueFromArray(this._metadataStreams, output);
+            removeValueFromArray(this._metadataStreams, output as icy.Writer);
 
             this._inputStream.unpipe(encoder);
             encoder.unpipe(output);
@@ -118,17 +118,17 @@ export class Nicercast {
     setMetadata(metadata: string) {
         this._metadata = metadata;
 
-        this._metadataStreams.forEach((stream) => {
-            stream.queue(metadata);
+        this._metadataStreams.forEach((listenStream) => {
+            listenStream.queue(metadata);
         });
     }
 
-    setInputStream(inputStream: EventEmitter) {
+    setInputStream(inputStream: NodeJS.ReadStream) {
         const currentInput = this._inputStream;
 
-        this._listenStreams.forEach((stream) => {
-            currentInput.unpipe(stream);
-            inputStream.pipe(stream);
+        this._listenStreams.forEach((listenStream) => {
+            currentInput.unpipe(listenStream);
+            inputStream.pipe(listenStream);
         });
 
         this._inputStream = inputStream;
