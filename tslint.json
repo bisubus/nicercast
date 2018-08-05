@@ -37,7 +37,7 @@
     "one-variable-per-declaration": [true, "ignore-for-loop"],
     "prefer-const": true,
     "quotemark": [true, "avoid-escape", "single"],
-    "semicolon": [true, "never"],
+    "semicolon": [true, "always"],
     "switch-default": true,
     "trailing-comma": [true, { "multiline": "always", "singleline": "never" }],
     "triple-equals": true,

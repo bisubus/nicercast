@@ -9,7 +9,7 @@ var assert = require('assert')
 var baudio = require('baudio')
 var concat = require('concat-stream')
 
-var Nicercast = require('./')
+var Nicercast = require('./').Nicercast
 
 describe('Nicercast', function () {
   var server, remote
@@ -19,7 +19,7 @@ describe('Nicercast', function () {
       return Math.sin(2 * Math.PI * t * 441)
     })
 
-    server = new Nicercast(input, { metadata: 'Initial metadata' })
+    server = new Nicercast(input, 'Initial metadata')
 
     server.listen(0, function () {
       var info = server.address()
@@ -51,9 +51,10 @@ describe('Nicercast', function () {
   it('/listen', function (done) {
     this.timeout(10000) // 10 Seconds
 
+    var devnullPath = (process.platform === 'win32') ? '\\\\.\\NUL' : '/dev/null';
     var req = icy.get(remote + 'listen', function (res) {
       var decoder = new lame.Decoder()
-      var devnull = fs.createWriteStream('/dev/null')
+      var devnull = fs.createWriteStream(devnullPath)
 
       var format = null
       var metadatas = []
