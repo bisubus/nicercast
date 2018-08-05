@@ -18,22 +18,15 @@ function removeValueFromArray<T>(array: T[], value: T) {
 }
 
 export class Nicercast {
+    protected _server: http.Server;
+    protected _listenStreams: stream.Transform[] = [];
+    protected _metadataStreams: icy.Writer[] = [];
 
-    _server: http.Server;
-    _inputStream: NodeJS.ReadStream;
-    _metadata: string;
-    _listenStreams: stream.Transform[] = [];
-    _metadataStreams: icy.Writer[] = [];
-
-    constructor(inputStream: NodeJS.ReadStream, metadata = 'Nicercast') {
-
+    constructor(protected _inputStream: NodeJS.ReadStream, protected _metadata: string = 'Nicercast') {
         this._server = http.createServer(this._handleRequest.bind(this));
-        this._inputStream = inputStream;
-        this._metadata = metadata;
-
     }
 
-    _handleRequest(req: http.IncomingMessage, res: http.ServerResponse) {
+    protected _handleRequest(req: http.IncomingMessage, res: http.ServerResponse) {
         switch (req.url) {
             case '/':
             case '/listen.m3u':
@@ -60,7 +53,7 @@ export class Nicercast {
         }
     }
 
-    _playlist(req: http.IncomingMessage, res: http.ServerResponse) {
+    protected _playlist(req: http.IncomingMessage, res: http.ServerResponse) {
         const urlProps: url.UrlObject = {
             protocol: 'http',
             pathname: '/listen',
@@ -77,7 +70,7 @@ export class Nicercast {
         res.end(url.format(urlProps));
     }
 
-    _listen(req: http.IncomingMessage, res: http.ServerResponse) {
+    protected _listen(req: http.IncomingMessage, res: http.ServerResponse) {
         const acceptsMetadata = (req.headers['icy-metadata'] === '1');
 
         res.writeHead(200, {
